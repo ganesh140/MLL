@@ -1,0 +1,68 @@
+import pandas as pd
+df_data = pd.read_csv('lab5.csv',header=None).astype('float')
+size =int(len(df_data)*0.67)
+train_df = df_data.iloc[:size].copy()
+test_df = df_data.iloc[size:].copy()
+
+
+import math
+def mean(numbers):
+    return sum(numbers)/float(len(numbers))
+    
+def stdev(numbers):
+    avg = mean(numbers)
+    variance = sum([pow(x-avg,2) for x in numbers])/float(len(numbers)-1)
+    return math.sqrt(variance)
+    
+def summarize(data):
+    summaries = [(mean(data[attribute]), stdev(data[attribute])) for attribute in data.columns[0:-1]]
+    return summaries
+
+def summarizeByClass(train_df):
+    summary={}
+    for key,value in train_df.groupby(train_df.columns[-1]):
+        summary[key]=summarize(value)
+    return summary
+
+def calculateProbability(x, mean, stdev):
+    exponent = math.exp(-(math.pow(x-mean,2)/(2*math.pow(stdev,2))))
+    return (1 / (math.sqrt(2*math.pi) * stdev)) * exponent
+    
+def calculateClassProbabilities(summaries, inputVector):
+    probabilities = {}
+    for classValue, classSummaries in summaries.items():
+        probabilities[classValue] = 1
+        for i in range(len(classSummaries)):
+            mean, stdev = classSummaries[i]
+            x = inputVector[i]
+            probabilities[classValue] *= calculateProbability(x, mean, stdev)
+    return probabilities
+    
+def predict(summaries,inputVector):
+    probabilities = calculateClassProbabilities(summaries, inputVector)
+    bestLabel, bestProb = None, -1
+    for classValue, probability in probabilities.items():
+        if bestLabel is None or probability > bestProb:
+            bestProb = probability
+            bestLabel = classValue
+    return bestLabel
+
+def getPredictions(summaries,testSet):
+    predictions = []
+    for i in range(len(testSet)):
+        result = predict(summaries,testSet.iloc[i:i+1])
+        predictions.append(result)
+    return predictions
+
+def getAccuracy(testSet, predictions):
+    correct = 0
+    for x in range(len(testSet)):
+        if testSet.iloc[x:x+1][8].values == predictions[x]:
+            correct += 1
+    return (correct/float(len(testSet))) * 100.0
+    
+    
+summaries = summarizeByClass(train_df)
+predictions = getPredictions(summaries,test_df)
+accuracy = getAccuracy(test_df, predictions)
+print('Accuracy is '+str(accuracy))
