@@ -1,0 +1,31 @@
+import pandas as pd
+import numpy as np
+data = pd.read_csv('lab1.csv')
+concepts = np.array(data)[:,:-1]
+target = np.array(data)[:,-1]
+print(data)
+print(target)
+
+
+
+def train(con,tar):
+    specific_h = con[0]
+    count=0       
+            
+    for i,val in enumerate(con):
+        print(i,val)
+        if tar[i]=='yes':
+            for x in range(len(specific_h)):
+                if val[x] == specific_h[x]:
+                    pass
+                else:
+                    specific_h[x] = '?'
+            count+=1
+            print(f"Hypothesis after sample number:{count} processed: {specific_h}")
+        else:
+            pass
+            count+=1
+            print(f'Negative sample number: {count} same hypothesis: {specific_h}')
+    return specific_h
+    
+print("Final Hypothesis:", train(concepts,target))
