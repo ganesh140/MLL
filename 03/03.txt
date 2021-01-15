@@ -13,6 +13,7 @@ def entropy_list(a_list):
 import math
 def entropy(probs):
     return sum([-prob*math.log(prob,2) for prob in probs])
+    
 def info_gain(df,split,target,trace=0):
     df_split = df.groupby(split)
     nobs = len(df.index)*1.0
@@ -21,6 +22,7 @@ def info_gain(df,split,target,trace=0):
     new_entropy = sum( df_agg_ent['Entropy'] * df_agg_ent["PropObserved"])
     old_entropy = entropy_list(df[target])
     return old_entropy - new_entropy
+    
 def id3(df,target,attribute_name,default_class = None):
     cnt = Counter(x for x in df[target])
     if len(cnt)==1:
@@ -38,6 +40,7 @@ def id3(df,target,attribute_name,default_class = None):
             subtree = id3(data_subset,target,remaining_attr,default_class)
             tree[best_attr][attr_val] = subtree
         return tree
+        
 def classify(instance,tree,default = None):
     attribute = next(iter(tree))
     if instance[attribute] in tree[attribute].keys():
